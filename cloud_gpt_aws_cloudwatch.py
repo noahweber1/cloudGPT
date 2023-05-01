@@ -64,8 +64,19 @@ def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solutio
         messages=[
         {"role": "system", "content": meta_prompt},
         {"role": "user", "content": text_prompt},
-        ]
+        ],
     )
+
+    if restart_gpt:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+            {"role": "system", "content": meta_prompt},
+            {"role": "user", "content": text_prompt},
+            ],
+            user="New session"
+        )
+
     code_response_body=response["choices"][0]["message"]["content"]
 
     #TODO unsafe, find better way to execute the returned strings
