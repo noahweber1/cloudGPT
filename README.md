@@ -61,6 +61,8 @@ Current capabilities:
     d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION" and "AWS_SESSION_TOKEN" in all GPT_AWS scripts.
 
     e) Insert the OpenAI credentials into cloud_gpt_aws_cloudwatch.py and run it.
+    
+ _NOTE: The complexity of the solution is inherently tied to the number of tokens you GPT4 model can produce. Currently the 32k version is the most powerfull.._   
 
 ### Installation (PyPi still missing)
 ```bash
