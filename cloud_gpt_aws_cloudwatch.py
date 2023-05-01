@@ -36,7 +36,7 @@ def collect_cloudwatch_logs() -> str:
     
     return all_cloudwatchs_logs
 
-def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solution and test it on localstack", cloud_watch_logs=""):
+def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solution and test it on localstack", cloud_watch_logs="", restart_gpt=False):
 
     meta_prompt = '''You are an autonomous agent called "assistant for AWS
     solution architecture" which act as an python function generator.
@@ -56,8 +56,9 @@ def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solutio
     5. Do not use zip files as part of the solution.
     6. Try not to over-engineer the solution.
     7. Use boto3 to construct the solution.
+    8. You have to specify
     ''' + 'Additionally use the following cloud watch log messages to correct your response' + cloud_watch_logs
-    # CALL GPT
+    # CALL GPT, GPT-3.5 does not work as well currently.
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -65,17 +66,19 @@ def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solutio
         {"role": "user", "content": text_prompt},
         ]
     )
-    #function_create_by_gpt = gpt.call(meta_prompt + text_prompt)
-    #function_create_by_gpt()
     code_response_body=response["choices"][0]["message"]["content"]
 
     #TODO unsafe, find better way to execute the returned strings
     exec(code_response_body)
 
-    return collect_cloudwatch_logs
+    return code_response_body
 
 def main(text):
-    while True:
+
+    first_iteration=0
+    second_iteration=0
+
+    while True and first_iteration<11:
         try:
             cloud_watch_logs = collect_cloudwatch_logs()
             aws_architecture_to_be_evaluated(text_prompt=text, cloud_watch_logs=cloud_watch_logs)
@@ -85,9 +88,21 @@ def main(text):
         except ValueError as error:
             print("Caught an error:", error)
             text=error
-    # Do something with the error message
-    # For example, you can log the error or perform some other action
 
+    while True and second_iteration<10:
+        try:
+            cloud_watch_logs = collect_cloudwatch_logs()
+            aws_architecture_to_be_evaluated(text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=True)
+            print("Operation completed without errors.")
+            break # If no exception is caught, exit the loop
+
+        except ValueError as error:
+            print("Caught an error:", error)
+            text=error
+
+    code_response_body= aws_architecture_to_be_evaluated(text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=False)
+
+    print(f"Final code: {code_response_body}")
 
 if __name__ == "__main__":
     

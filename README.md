@@ -56,9 +56,11 @@ Current capabilities:
 
     b) Create a dev environement in AWS. Preferably with budgets. (Agent will interact with the alerts, see further development tickets at the page end.)
 
-    c) Make sure that AWS Toolkit in VS Code is enabled, installed and connected to your dev environement
+    c) Make sure that AWS Toolkit in VS Code is enabled, installed and connected to your dev environement.
 
-    d) Insert the OpenAI credentials into cloud_gpt_aws_cloudwatch.py and run it.
+    d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION" and "AWS_SESSION_TOKEN" in all GPT_AWS scripts.
+
+    e) Insert the OpenAI credentials into cloud_gpt_aws_cloudwatch.py and run it.
 
 ### Installation (PyPi still missing)
 ```bash
