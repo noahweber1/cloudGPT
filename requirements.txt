@@ -1,0 +1,3 @@
+openai
+boto3
+localstack
