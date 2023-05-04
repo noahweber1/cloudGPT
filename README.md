@@ -224,8 +224,8 @@ Task priorities are ordered (still missing):
 6. Estimate the cost and stdout the estimate at every (successfull) iteration.
 7. Integrate LMQL: LMQL is a programming language for language model interaction. This would allow better suggestions: https://lmql.ai/#wiki
 8. add more examples to README.md
-9. Integrate a vector database for better memory.
-
+9. Integrate [hatch](https://hatch.pypa.io/latest/install/) to manage the development environment and production build.
+10. CI/CD on Github Actions.
 
 Following are less-important, but needed tasks:
 
