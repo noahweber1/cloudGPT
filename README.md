@@ -1,5 +1,5 @@
 <h1 align="center">
-CloudGPT: One line to generate all cloud infrastructure ☁️
+cloudgpt: One line to generate all cloud infrastructure ☁️
 </h1>
 
 <p align="center">
@@ -243,7 +243,7 @@ Following are less-important, but needed tasks:
 12. if the user runs cloudgpt without any arguments, show the help message
 13. autoscaling enabled for cost saving
 14. support for other large language models like Open Assistent
-15. use CloudGPT list to show all deployments
-16. CloudGPT delete to delete a deployment
-17. CloudGPT update to update a deployment
+15. use cloudgpt list to show all deployments
+16. cloudgpt delete to delete a deployment
+17. cloudgpt update to update a deployment
 18. Release workflow
