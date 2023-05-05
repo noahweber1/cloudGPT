@@ -58,7 +58,7 @@ Current capabilities:
 
     c) Make sure that AWS Toolkit in VS Code is enabled, installed and connected to your dev environement.
 
-    d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION" and "AWS_SESSION_TOKEN" in all GPT_AWS scripts.
+    d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY" and "AWS_DEFAULT_REGION" in all GPT_AWS scripts.
 
     e) Insert the OpenAI credentials into cloud_gpt_aws_cloudwatch.py and run it.
     
@@ -94,7 +94,7 @@ cloudgpt deploy --infrastructure_path <path to infrastructure>
 ```
 
 
-## Examples
+## Examples - localstack
 
 
 ### SQS - SNS Architecture
@@ -107,7 +107,7 @@ gptdeploy generate --description "write me a sqs and sns solution and test it on
 
 <img src="misc\sns_sqs.png" alt="First mistake AWS agent" heigth="150"/>
 
-We first get a mistake because agent suggest following architecture:
+We first get a mistake because agent suggests following architecture:
 
 ```python
 import boto3
@@ -195,6 +195,227 @@ else:
 
 ```
 <img src="misc\sns_sqs_no_mistake.png" alt="Sucess AWS agent" height="100" />
+
+
+## Examples - AWS
+
+
+### S3-RDS Architecture
+
+```bash
+
+gptdeploy generate --description "create an s3 bucket and rds database and test that data is transferred between the two"
+```
+
+
+<img src="misc\s3_rds.png" alt="First mistake AWS agent" heigth="150"/>
+
+We first get a mistake because agent suggests following architecture:
+
+```python
+import boto3
+import os
+from botocore.exceptions import ClientError
+
+
+def create_s3_bucket(bucket_name):
+    s3 = boto3.client('s3', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                      aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                      region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        s3.create_bucket(Bucket=bucket_name)
+    except ClientError as e:
+        print(e)
+
+
+def create_rds_instance(instance_name, master_username, master_password):
+    rds = boto3.client('rds', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                       aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                       region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        rds.create_db_instance(
+            DBName=instance_name,
+            AllocatedStorage=20,
+            DBInstanceIdentifier=instance_name,
+            Engine='mysql',
+            MasterUsername=master_username,
+            MasterUserPassword=master_password,
+            DBInstanceClass='db.t2.micro',
+            VpcSecurityGroupIds=[],
+            AvailabilityZone=os.environ['AWS_DEFAULT_REGION'] + 'a'
+        )
+    except ClientError as e:
+        print(e)
+
+
+def test_data_transfer(bucket_name, instance_name, master_username, master_password):
+    import pymysql
+    import time
+
+    s3 = boto3.resource('s3', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                        region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    rds = boto3.client('rds', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                       aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                       region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        s3.Object(bucket_name, 'test_data.txt').put(Body='Hello World!')
+    except ClientError as e:
+        print(e)
+
+    instance = rds.describe_db_instances(DBInstanceIdentifier=instance_name)['DBInstances'][0]
+
+    while instance['DBInstanceStatus'] != 'available':
+        time.sleep(10)
+        instance = rds.describe_db_instances(DBInstanceIdentifier=instance_name)['DBInstances'][0]
+
+    try:
+        connection = pymysql.connect(
+            host=instance['Endpoint']['Address'],
+            user=master_username,
+            password=master_password,
+            db=instance_name
+        )
+
+        with connection.cursor() as cursor:
+            cursor.execute('CREATE TABLE IF NOT EXISTS test_data (id INT AUTO_INCREMENT PRIMARY KEY, content TEXT NOT NULL)')
+            cursor.execute("INSERT INTO test_data (content) VALUES ('Hello World!')")
+            connection.commit()
+
+            cursor.execute('SELECT * FROM test_data')
+            result = cursor.fetchone()
+
+            assert result[1] == 'Hello World!'
+
+            print('Data transfer test passed.')
+
+    except pymysql.MySQLError as e:
+        print(e)
+
+
+def deploy_solution(bucket_name, instance_name, master_username, master_password):
+    create_s3_bucket(bucket_name)
+    create_rds_instance(instance_name, master_username, master_password)
+    test_data_transfer(bucket_name, instance_name, master_username, master_password)
+
+
+if __name__ == '__main__':
+    deploy_solution('my-test-s3-bucket', 'my-test-rds-instance', 'myuser', 'mypassword')
+```
+
+
+<img src="misc\mistake_s3_rds.png" alt="First mistake AWS agent" heigth="150"/>
+
+This mistake is fed back as input to the agent automatically, as a conversation point. Afterwards it self corrects and publishes exactly what was needed, passing the test.
+
+```python
+import boto3
+import os
+from botocore.exceptions import ClientError
+import uuid
+
+
+def create_s3_bucket(bucket_name):
+    s3 = boto3.client('s3', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                      aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                      region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': os.environ['AWS_DEFAULT_REGION']})
+    except ClientError as e:
+        print(e)
+
+
+def create_rds_instance(instance_name, master_username, master_password):
+    rds = boto3.client('rds', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                       aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                       region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        rds.create_db_instance(
+            AllocatedStorage=20,
+            DBInstanceIdentifier=instance_name,
+            Engine='mysql',
+            MasterUsername=master_username,
+            MasterUserPassword=master_password,
+            DBInstanceClass='db.t2.micro',
+            VpcSecurityGroupIds=[],
+            AvailabilityZone=os.environ['AWS_DEFAULT_REGION'] + 'a'
+        )
+    except ClientError as e:
+        print(e)
+
+
+def test_data_transfer(bucket_name, instance_name, master_username, master_password):
+    import pymysql
+    import time
+
+    s3 = boto3.resource('s3', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                        region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    rds = boto3.client('rds', aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                       aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+                       region_name=os.environ['AWS_DEFAULT_REGION'])
+
+    try:
+        s3.Object(bucket_name, 'test_data.txt').put(Body='Hello World!')
+    except ClientError as e:
+        print(e)
+
+    instance = rds.describe_db_instances(DBInstanceIdentifier=instance_name)['DBInstances'][0]
+
+    while instance['DBInstanceStatus'] != 'available':
+        time.sleep(10)
+        instance = rds.describe_db_instances(DBInstanceIdentifier=instance_name)['DBInstances'][0]
+
+    try:
+        connection = pymysql.connect(
+            host=instance['Endpoint']['Address'],
+            user=master_username,
+            password=master_password,
+            db='mysql'
+        )
+
+        with connection.cursor() as cursor:
+            cursor.execute('CREATE DATABASE IF NOT EXISTS test_db')
+            cursor.execute('USE test_db')
+            cursor.execute('CREATE TABLE IF NOT EXISTS test_data (id INT AUTO_INCREMENT PRIMARY KEY, content TEXT NOT NULL)')
+            cursor.execute("INSERT INTO test_data (content) VALUES ('Hello World!')")
+            connection.commit()
+
+            cursor.execute('SELECT * FROM test_data')
+            result = cursor.fetchone()
+
+            assert result[1] == 'Hello World!'
+
+            print('Data transfer test passed.')
+
+    except pymysql.MySQLError as e:
+        print(e)
+
+
+def deploy_solution(bucket_name, instance_name, master_username, master_password):
+    unique_id = str(uuid.uuid4())
+    create_s3_bucket(bucket_name + '-' + unique_id)
+    create_rds_instance(instance_name + '-' + unique_id, master_username, master_password)
+    test_data_transfer(bucket_name + '-' + unique_id, instance_name + '-' + unique_id, master_username, master_password)
+
+
+if __name__ == '__main__':
+    deploy_solution('my-test-s3-bucket', 'my-test-rds-instance', 'myuser', 'mypassword')
+
+
+```
+<img src="misc\s3.png" alt="Sucess AWS agent" height="100" />
+<img src="misc\rds.png" alt="Sucess AWS agent" height="100" />
+
+
+
 
 ## Technical Insights
 The graphic below illustrates the process of creating the proposal architecture and deploying it to the cloud elaboration two different implementation strategies.

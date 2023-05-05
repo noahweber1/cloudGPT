@@ -2,7 +2,7 @@ import boto3
 import os
 import argparse
 import openai
-openai.api_key = ""
+openai.api_key = "INSERT YOUR KEY"
 
 os.environ['AWS_DEFAULT_REGION'] = ''
 os.environ['AWS_ACCESS_KEY_ID'] = ''
@@ -56,7 +56,10 @@ def aws_architecture_to_be_evaluated(text_prompt="write me a sqs and sns solutio
     5. Do not use zip files as part of the solution.
     6. Try not to over-engineer the solution.
     7. Use boto3 to construct the solution.
-    8. You have to specify
+    8. You can assume that "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY" and "AWS_DEFAULT_REGION" are already defined.
+    9. The solution should be as short as possible.
+    10. You should define the neccessary ARN roles for any services.
+
     ''' + 'Additionally use the following cloud watch log messages to correct your response' + cloud_watch_logs
     # CALL GPT, GPT-3.5 does not work as well currently.
     response = openai.ChatCompletion.create(

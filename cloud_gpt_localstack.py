@@ -1,6 +1,5 @@
 # make sure you have boto3, openapi, localstack and awscli installed as python libraries. (besides docker for localstack)
 
-import boto3
 import os
 import argparse
 import openai
