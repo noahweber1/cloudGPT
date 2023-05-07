@@ -37,15 +37,13 @@ def local_stack_architecture_to_be_submitted(text_prompt="write me a sqs and sns
         model="gpt-4",
         messages=[
         {"role": "system", "content": meta_prompt},
-        {"role": "user", "content": text_prompt},
+        {"role": "user", "content": str(text_prompt)},
         ]
     )
-    #function_create_by_gpt = gpt.call(meta_prompt + text_prompt)
-    #function_create_by_gpt()
     code_response_body=response["choices"][0]["message"]["content"]
 
     #TODO unsafe, find better way to execute the returned strings
-    exec(code_response_body)
+    exec(code_response_body, globals())
 
 def main(text):
     while True:
@@ -54,15 +52,13 @@ def main(text):
             print("Operation completed without errors.")
             break # If no exception is caught, exit the loop
 
-        except ValueError as error:
+        except Exception as error:
             print("Caught an error:", error)
             text=error
-    # Do something with the error message
-    # For example, you can log the error or perform some other action
 
 if __name__ == "__main__":
     
-    parser = argparse.ArgumentParser(description="Describe the AWS architecture that you want deploy on local stack.")
+    parser = argparse.ArgumentParser(description="Describe the AWS architecture that you want deploy on localstack.")
     parser.add_argument("text", type=str, help="Text to pass to the script")
 
     args = parser.parse_args()

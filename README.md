@@ -1,5 +1,5 @@
 <h1 align="center">
-cloudgpt: One line to generate all cloud infrastructure ☁️
+cloudGPT: One line to generate all cloud infrastructure ☁️
 </h1>
 
 <p align="center">
@@ -28,21 +28,36 @@ Use natural language to create a fully functional, tested and deployed cloud inf
 
 
 This project streamlines the creation and deployment of cloud infrastructure. 
-Simply describe your problem using natural language, and the system will automatically build, test and deploy the best cloud architecture.    
-
-_NOTE: some features are still under heavy development, to test current version, see points 1. and 2. underneath._     
+Simply describe your problem using natural language, and the system will automatically build, test and deploy the best cloud architecture based on your prompt.      
     
 Current capabilities:
-   1. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there.
-   2. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there.
+   1. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there.
+   2. [✅] External memory with vector database - Pinecone (Optional configuration possibility).
+   3. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there.
     
 ## Quickstart
     
 ### Requirements
 - OpenAI key with access to GPT-4
+- AWS Account
+- [Optional] Pinecone access
 
+
+### 1. Deploy AWS architecture on a dev environement directly in AWS and test it there.
     
-### 1. Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there.
+    a) Install all the dependencies (as noted in requirements.txt)
+
+    b) Create a dev environement in AWS. Preferably with budgets. (Agent will interact with the budgetalerts, see further development tickets at the page end.)
+
+    c) Make sure that AWS Toolkit in VS Code is enabled, installed and connected to your dev environement.
+
+    d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY" and "AWS_DEFAULT_REGION" in the 'cloud_gpt_aws_cloudwatch.py' script.
+
+    e) Insert the OpenAI credentials into 'cloud_gpt_aws_cloudwatch.py' script.
+
+    f) Run the script: 'python cloud_gpt_aws_cloudwatch.py "create an s3 bucket and rds database and test that data is transferred between the two"'
+    
+### 2. Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there.
 
     a) Install all the dependencies (as noted in requirements.txt)
 
@@ -50,19 +65,8 @@ Current capabilities:
 
     c) Insert the OpenAI credentials into cloud_gpt_mvp.py and run it.
 
-### 2. Deploy AWS architecture on a dev environement directly in AWS and test it there.
     
-    a) Install all the dependencies (as noted in requirements.txt)
-
-    b) Create a dev environement in AWS. Preferably with budgets. (Agent will interact with the alerts, see further development tickets at the page end.)
-
-    c) Make sure that AWS Toolkit in VS Code is enabled, installed and connected to your dev environement.
-
-    d) Make sure you define "AWS_ACCESS_KEY_ID" , "AWS_SECRET_ACCESS_KEY" and "AWS_DEFAULT_REGION" in all GPT_AWS scripts.
-
-    e) Insert the OpenAI credentials into cloud_gpt_aws_cloudwatch.py and run it.
-    
- _NOTE: The complexity of the solution is inherently tied to the number of tokens you GPT4 model can produce. Currently the 32k version is the most powerfull.._   
+ _NOTE: The complexity of the solution is inherently tied to the number of tokens you GPT4 model can produce. Currently the 32k version is the most powerfull._   
 
 ### Installation (PyPi still missing)
 ```bash
@@ -92,110 +96,6 @@ We will provide a tutorial how to set up a sandbox environment for the AWS.
 ```bash
 cloudgpt deploy --infrastructure_path <path to infrastructure>
 ```
-
-
-## Examples - localstack
-
-
-### SQS - SNS Architecture
-
-```bash
-
-gptdeploy generate --description "write me a sqs and sns solution and test it on localstack"
-```
-
-
-<img src="misc\sns_sqs.png" alt="First mistake AWS agent" heigth="150"/>
-
-We first get a mistake because agent suggests following architecture:
-
-```python
-import boto3
-import os
-import time
-
-os.environ["AWS_ACCESS_KEY_ID"] = "test"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-os.environ["LOCALSTACK_HOSTNAME"] = "localhost"
-
-sqs_client = boto3.client("sqs", endpoint_url="http://localhost:4566")
-sns_client = boto3.client("sns", endpoint_url="http://localhost:4566")
-
-sqs_queue = sqs_client.create_queue(QueueName="test_queue")
-queue_url = sqs_queue["QueueUrl"]
-
-sns_topic = sns_client.create_topic(Name="test_topic")
-topic_arn = sns_topic["TopicArn"]
-
-sns_client.subscribe(
-    TopicArn=topic_arn,
-    Protocol="sqs",
-    Endpoint=f"{queue_url}",
-)
-
-message = "Test message for SQS and SNS solution on LocalStack"
-sns_client.publish(TopicArn=topic_arn, Message=message)
-
-time.sleep(2)
-
-received_messages = sqs_client.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1)
-
-if len(received_messages.get("Messages", [])) > 0:
-    message_id = received_messages["Messages"][0]["MessageId"]
-    print(f"Message successfully received with ID: {message_id}")
-else:
-    print("No messages received, test failed.")
-```
-
-
-<img src="misc\sns_sqs_mistake.png" alt="First mistake AWS agent" heigth="150"/>
-
-This mistake is fed back as input to the agent automatically, as a conversation point. Afterwards it self corrects and publishes exactly what was needed, passing the test.
-
-```python
-import boto3
-import os
-import time
-
-os.environ["AWS_ACCESS_KEY_ID"] = "test"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-os.environ["LOCALSTACK_HOSTNAME"] = "localhost"
-
-sqs_client = boto3.client("sqs", endpoint_url="http://localhost:4566")
-sns_client = boto3.client("sns", endpoint_url="http://localhost:4566")
-
-sqs_queue = sqs_client.create_queue(QueueName="test_queue")
-queue_url = sqs_queue["QueueUrl"]
-
-queue_arn = f"arn:aws:sqs:{os.environ['AWS_DEFAULT_REGION']}:{os.environ['AWS_ACCESS_KEY_ID']}:test_queue"
-
-sns_topic = sns_client.create_topic(Name="test_topic")
-topic_arn = sns_topic["TopicArn"]
-
-sns_client.subscribe(
-    TopicArn=topic_arn,
-    Protocol="sqs",
-    Endpoint=queue_arn,
-)
-
-message = "Test message for SQS and SNS solution on LocalStack"
-sns_client.publish(TopicArn=topic_arn, Message=message)
-
-time.sleep(2)
-
-received_messages = sqs_client.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1)
-
-if len(received_messages.get("Messages", [])) > 0:
-    message_id = received_messages["Messages"][0]["MessageId"]
-    print(f"Message successfully received with ID: {message_id}")
-else:
-    print("No messages received, test failed.")
-
-```
-<img src="misc\sns_sqs_no_mistake.png" alt="Sucess AWS agent" height="100" />
-
 
 ## Examples - AWS
 
@@ -414,10 +314,115 @@ if __name__ == '__main__':
 <img src="misc\s3.png" alt="Sucess AWS agent" height="100" />
 <img src="misc\rds.png" alt="Sucess AWS agent" height="100" />
 
+<img src="misc\success_deployment.png" alt="Sucess AWS agent" height="170" />
+
+
+## Examples - localstack
+
+
+### SQS - SNS Architecture
+
+```bash
+
+gptdeploy generate --description "write me a sqs and sns solution and test it on localstack"
+```
+
+
+<img src="misc\sns_sqs.png" alt="First mistake AWS agent" heigth="150"/>
+
+We first get a mistake because agent suggests following architecture:
+
+```python
+import boto3
+import os
+import time
+
+os.environ["AWS_ACCESS_KEY_ID"] = "test"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+os.environ["LOCALSTACK_HOSTNAME"] = "localhost"
+
+sqs_client = boto3.client("sqs", endpoint_url="http://localhost:4566")
+sns_client = boto3.client("sns", endpoint_url="http://localhost:4566")
+
+sqs_queue = sqs_client.create_queue(QueueName="test_queue")
+queue_url = sqs_queue["QueueUrl"]
+
+sns_topic = sns_client.create_topic(Name="test_topic")
+topic_arn = sns_topic["TopicArn"]
+
+sns_client.subscribe(
+    TopicArn=topic_arn,
+    Protocol="sqs",
+    Endpoint=f"{queue_url}",
+)
+
+message = "Test message for SQS and SNS solution on LocalStack"
+sns_client.publish(TopicArn=topic_arn, Message=message)
+
+time.sleep(2)
+
+received_messages = sqs_client.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1)
+
+if len(received_messages.get("Messages", [])) > 0:
+    message_id = received_messages["Messages"][0]["MessageId"]
+    print(f"Message successfully received with ID: {message_id}")
+else:
+    print("No messages received, test failed.")
+```
+
+
+<img src="misc\sns_sqs_mistake.png" alt="First mistake AWS agent" heigth="150"/>
+
+This mistake is fed back as input to the agent automatically, as a conversation point. Afterwards it self corrects and publishes exactly what was needed, passing the test.
+
+```python
+import boto3
+import os
+import time
+
+os.environ["AWS_ACCESS_KEY_ID"] = "test"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+os.environ["LOCALSTACK_HOSTNAME"] = "localhost"
+
+sqs_client = boto3.client("sqs", endpoint_url="http://localhost:4566")
+sns_client = boto3.client("sns", endpoint_url="http://localhost:4566")
+
+sqs_queue = sqs_client.create_queue(QueueName="test_queue")
+queue_url = sqs_queue["QueueUrl"]
+
+queue_arn = f"arn:aws:sqs:{os.environ['AWS_DEFAULT_REGION']}:{os.environ['AWS_ACCESS_KEY_ID']}:test_queue"
+
+sns_topic = sns_client.create_topic(Name="test_topic")
+topic_arn = sns_topic["TopicArn"]
+
+sns_client.subscribe(
+    TopicArn=topic_arn,
+    Protocol="sqs",
+    Endpoint=queue_arn,
+)
+
+message = "Test message for SQS and SNS solution on LocalStack"
+sns_client.publish(TopicArn=topic_arn, Message=message)
+
+time.sleep(2)
+
+received_messages = sqs_client.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1)
+
+if len(received_messages.get("Messages", [])) > 0:
+    message_id = received_messages["Messages"][0]["MessageId"]
+    print(f"Message successfully received with ID: {message_id}")
+else:
+    print("No messages received, test failed.")
+
+```
+<img src="misc\sns_sqs_no_mistake.png" alt="Sucess AWS agent" height="100" />
 
 
 
-## Technical Insights
+
+# Technical Explanation
 The graphic below illustrates the process of creating the proposal architecture and deploying it to the cloud elaboration two different implementation strategies.
 
 <img src="misc\cloud_gpt.png" alt="Workflow" />
@@ -461,10 +466,10 @@ Following are less-important, but needed tasks:
 9. Integrate the possibility for Cloude (Anthropic AI)
 10. check if windows and linux support works
 11. support gpt3.5-turbo
-12. if the user runs cloudgpt without any arguments, show the help message
+12. if the user runs cloudGPT without any arguments, show the help message
 13. autoscaling enabled for cost saving
 14. support for other large language models like Open Assistent
-15. use cloudgpt list to show all deployments
-16. cloudgpt delete to delete a deployment
-17. cloudgpt update to update a deployment
+15. use cloudGPT list to show all deployments
+16. cloudGPT delete to delete a deployment
+17. cloudGPT update to update a deployment
 18. Release workflow
