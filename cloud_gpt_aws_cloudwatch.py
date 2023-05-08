@@ -11,7 +11,7 @@ os.environ['AWS_ACCESS_KEY_ID'] = ''
 os.environ['AWS_SECRET_ACCESS_KEY'] = ''
 
 def main(text):
-
+    main_prompt=text
     first_iteration=0
     second_iteration=0
 
@@ -19,7 +19,7 @@ def main(text):
         try:
             first_iteration+=1
             cloud_watch_logs = collect_cloudwatch_logs()
-            code_response_body = aws_architecture_to_be_evaluated(text_prompt=text, cloud_watch_logs=cloud_watch_logs, iteration=first_iteration)
+            code_response_body = aws_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, iteration=first_iteration)
             print("Operation completed without errors.")
             break # If no exception is caught, exit the loop
 
@@ -31,7 +31,7 @@ def main(text):
         try:
             second_iteration+=1
             cloud_watch_logs = collect_cloudwatch_logs()
-            code_response_body = aws_architecture_to_be_evaluated(text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=True)
+            code_response_body = aws_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=True, iteration=first_iteration)
             print("Operation completed without errors.")
             break # If no exception is caught, exit the loop
 
@@ -45,6 +45,6 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Describe the AWS architecture that you want deploy on AWS:")
     parser.add_argument("text", type=str, help="Text to pass to the script")
-
     args = parser.parse_args()
+
     main(args.text)
