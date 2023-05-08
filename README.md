@@ -34,10 +34,19 @@ Current capabilities:
    1. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there. 🚀
    2. [✅] External memory with vector database - Pinecone (Optional configuration possibility). 🌲
    3. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there. 🏠
+
+
+## 📚 Table of Contents
+
+1. [📋 Requirements](#requirements)
+2. [🌐 Examples AWS](#examples-aws)
+3. [🏠 Examples localstack](#examples-localstack)
+4. [🔧 Technical Explanation](#technical-explanation)
+5. [🛠️ Task list](#task-list)
     
 ## Quickstart
     
-### Requirements
+## 📋 Requirements
 - OpenAI key with access to GPT-4
 - AWS Account
 - [Optional] Pinecone access
@@ -97,7 +106,7 @@ We will provide a tutorial how to set up a sandbox environment for the AWS.
 cloudgpt deploy --infrastructure_path <path to infrastructure>
 ```
 
-## Examples - AWS
+## 🌐 Examples AWS
 
 
 ### S3-RDS Architecture Example
@@ -395,7 +404,7 @@ Confirmation of deployment:
 
 <img src="misc\sqs_sns_aws.png" alt="First mistake AWS agent" heigth="150"/>
 
-## Examples - localstack
+## 🏠 Examples localstack
 
 
 ### SQS-SNS Architecture Example
@@ -516,7 +525,7 @@ The graphic below illustrates the process of creating the proposal architecture 
 
 
 
-## 🛠️ Task list:
+## 🛠️ Task list
 
 Task priorities are ordered (still missing):
 
