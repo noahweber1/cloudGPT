@@ -31,9 +31,9 @@ This project streamlines the creation and deployment of cloud infrastructure.
 Simply describe your problem using natural language, and the system will automatically build, test and deploy the best cloud architecture based on your prompt.      
     
 Current capabilities:
-   1. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there.
-   2. [✅] External memory with vector database - Pinecone (Optional configuration possibility).
-   3. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there.
+   1. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there. 🚀
+   2. [✅] External memory with vector database - Pinecone (Optional configuration possibility). 🌲
+   3. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there. 🏠
     
 ## Quickstart
     
