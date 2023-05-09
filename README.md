@@ -330,10 +330,10 @@ if __name__ == '__main__':
 
 ```bash
 
-gptdeploy generate --description "create an s3 bucket and rds database and test that data is transferred between the two"
+gptdeploy generate --description "create an SQS and SNS solution"
 ```
 
-or pass the "create an s3 bucket and rds database and test that data is transferred between the two" when calling the 'cloud_gpt_aws_cloud.py'
+or pass the "create an SQS and SNS solution" when calling the 'cloud_gpt_aws_cloud.py'
 
 <img src="misc\sns_sqs.png" alt="First mistake AWS agent" heigth="150"/>
 
