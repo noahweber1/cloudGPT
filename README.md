@@ -26,23 +26,31 @@ Use natural language to create a fully functional, tested and deployed cloud inf
     <img src="https://github.com/tiangolo/fastapi/workflows/Test/badge.svg?event=push&branch=master" alt="Test">
 </a>
 
-
+<p align="center">
 This project streamlines the creation and deployment of cloud infrastructure. 
-Simply describe your problem using natural language, and the system will automatically build, test and deploy the best cloud architecture based on your prompt.      
+Simply describe your problem using natural language, and the system will automatically build, test and deploy a cloud architecture based on your prompt.     
+</p>
+
+<p align="center">
+Error messages are forwarded back to GPT4 recursively and the system self-corrects itself until it passes all tests and gets deployed.
+</p>
     
 Current capabilities:
-   1. [✅] Deploy AWS architecture on a dev environement directly in AWS and test it there. 🚀
-   2. [✅] External memory with vector database - Pinecone (Optional configuration possibility). 🌲
-   3. [✅] Deploy AWS architecture on [localstack](https://localstack.cloud/) and test it there. 🏠
+   1. [✅] Test the proposed AWS architecture and deploy on a dev environement automatically. 🚀
+   2. [✅] Test and deploy any cloud architecture with [Terraform](https://www.terraform.io/). ⚙️
+   3. [✅] External memory with vector database - Pinecone (Optional configuration possibility). 🌲
+   4. [✅] Deploy AWS architecture on [Localstack](https://localstack.cloud/) and test it there. 🏠
 
+> ⚠️ Warning ⚠️ This project is in ALPHA developement and should NOT be used for direct deployments on the cloud. There are alot of security and monetary considerations.
 
 ## 📚 Table of Contents
 
 1. [📋 Requirements](#requirements)
 2. [🌐 Examples AWS](#examples-aws)
-3. [🏠 Examples localstack](#examples-localstack)
-4. [🔧 Technical Explanation](#technical-explanation)
-5. [🛠️ Task list](#task-list)
+3. [⚙️ Examples Terraform](#examples-terraform)
+4. [🏠 Examples localstack](#examples-localstack)
+5. [🔧 Technical Explanation](#technical-explanation)
+6. [🛠️ Task list](#task-list)
     
 ## Quickstart
     
