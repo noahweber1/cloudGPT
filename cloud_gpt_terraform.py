@@ -1,8 +1,8 @@
 import os
 import argparse
 import openai
-from src.apis.utils.chat_utils import aws_architecture_to_be_evaluated
-from src.apis.utils.general_utils import collect_cloudwatch_logs
+from src.utils.chat_utils import aws_architecture_to_be_evaluated
+from src.utils.general_utils import collect_cloudwatch_logs
 
 openai.api_key = ""
 

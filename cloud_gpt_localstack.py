@@ -3,7 +3,7 @@
 import os
 import argparse
 import openai
-from src.apis.utils.chat_utils import localstack_architecture_to_be_evaluated
+from src.utils.chat_utils import localstack_architecture_to_be_evaluated
 
 openai.api_key = ""
 

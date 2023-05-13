@@ -37,7 +37,7 @@ Error messages are forwarded back to GPT4 recursively and the system self-correc
     
 Current capabilities:
    1. [✅] Test the proposed AWS architecture and deploy on a dev environement automatically. 🚀
-   2. [✅] Test and deploy any cloud architecture with [Terraform](https://www.terraform.io/). ⚙️
+   2. [✅] Test and deploy any cloud architecture with Terraform. [python-terraform](https://github.com/beelit94/python-terraform/blob/master/README.md). ⚙️
    3. [✅] External memory with vector database - Pinecone (Optional configuration possibility). 🌲
    4. [✅] Deploy AWS architecture on [Localstack](https://localstack.cloud/) and test it there. 🏠
 
@@ -124,7 +124,7 @@ cloudgpt deploy --infrastructure_path <path to infrastructure>
 gptdeploy generate --description "create an s3 bucket and rds database and test that data is transferred between the two"
 ```
 
-or pass the "create an s3 bucket and rds database and test that data is transferred between the two" when calling the 'cloud_gpt_aws_cloud.py'
+or pass the "create an s3 bucket and rds database and test that data is transferred between the two" when calling the 'cloud_gpt_aws_cloudwatch.py'
 
 <img src="misc\s3_rds.png" alt="First mistake AWS agent" heigth="150"/>
 
@@ -341,7 +341,7 @@ if __name__ == '__main__':
 gptdeploy generate --description "create an SQS and SNS solution"
 ```
 
-or pass the "create an SQS and SNS solution" when calling the 'cloud_gpt_aws_cloud.py'
+or pass the "create an SQS and SNS solution" when calling the 'cloud_gpt_aws_cloudwatch.py'
 
 <img src="misc\sns_sqs.png" alt="First mistake AWS agent" heigth="150"/>
 
@@ -411,6 +411,17 @@ Confirmation of deployment:
 
 
 <img src="misc\sqs_sns_aws.png" alt="First mistake AWS agent" heigth="150"/>
+
+## ⚙️ Examples Terraform
+
+```bash
+
+gptdeploy generate --description "write a sqs and sns solution"
+```
+
+or pass the "write a sqs and sns solution" when calling the 'cloud_gpt_terraform.py'
+
+<img src="misc\terraform.png" alt="First mistake AWS agent" heigth="150"/>
 
 ## 🏠 Examples localstack
 

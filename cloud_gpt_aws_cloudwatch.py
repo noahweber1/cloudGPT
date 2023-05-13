@@ -1,8 +1,8 @@
 import os
 import argparse
 import openai
-from src.apis.utils.chat_utils import aws_architecture_to_be_evaluated
-from src.apis.utils.general_utils import collect_cloudwatch_logs
+from src.utils.chat_utils import terraform_architecture_to_be_evaluated
+from src.utils.general_utils import collect_cloudwatch_logs
 
 openai.api_key = ""
 
@@ -19,7 +19,7 @@ def main(text):
         try:
             first_iteration+=1
             cloud_watch_logs = collect_cloudwatch_logs()
-            code_response_body = aws_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, iteration=first_iteration)
+            code_response_body = terraform_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, iteration=first_iteration)
             print("Operation completed without errors.")
             break # If no exception is caught, exit the loop
 
@@ -31,7 +31,7 @@ def main(text):
         try:
             second_iteration+=1
             cloud_watch_logs = collect_cloudwatch_logs()
-            code_response_body = aws_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=True, iteration=first_iteration)
+            code_response_body = terraform_architecture_to_be_evaluated(main_prompt=main_prompt, text_prompt=text, cloud_watch_logs=cloud_watch_logs, restart_gpt=True, iteration=first_iteration)
             print("Operation completed without errors.")
             break # If no exception is caught, exit the loop
 
